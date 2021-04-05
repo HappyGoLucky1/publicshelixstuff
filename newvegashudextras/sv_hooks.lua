@@ -70,7 +70,7 @@ function PLUGIN:EntityTakeDamage(victim, dmgInfo)
 
 		if (ix.config.Get("bulletDamageBasedOnWeaponCondition", true)) then
 			condition = condition / 100
-			condition = 0.5 + ((0.5 * condition) / 0.75)
+			condition = 0.5 + math.min((0.5 * condition / 0.75), 0.5)
 
 			dmgInfo:SetDamage(math.Round(dmgInfo:GetDamage() * condition, 2))
 		end
