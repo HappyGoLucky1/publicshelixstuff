@@ -46,6 +46,7 @@ end
 
 function PLUGIN:EntityFireBullets(entity, bulletInfo)
 	local weaponItem = entity:GetActiveWeapon().ixItem
+	if (not weaponItem) then return end
 	local itemConditionDrainFactor = weaponItem.conditionDrainFactor or 1
 	local weaponConditionDrain = ix.config.Get("weaponConditionDrainRate", 1) * itemConditionDrainFactor
 
@@ -66,6 +67,7 @@ function PLUGIN:EntityTakeDamage(victim, dmgInfo)
 
 	if (attacker:IsPlayer()) then
 		local weaponItem = dmgInfo:GetAttacker():GetActiveWeapon().ixItem
+		if (not weaponItem) then return end
 		local condition = weaponItem:GetData("condition", 100)
 
 		if (ix.config.Get("bulletDamageBasedOnWeaponCondition", true)) then
