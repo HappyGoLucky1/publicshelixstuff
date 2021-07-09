@@ -53,7 +53,6 @@ CROSSHAIR_HOVER_ENTS["prop_ragdoll"] = true
 --entity : Entity that you are currently looking at.
 function PLUGIN:ShouldNewVegasCrosshairHover(entity)
 	if (entity:GetPos():Distance(LocalPlayer():GetPos()) > 100) then return false end
-	print(entity, entity:GetClass())
 	if (CROSSHAIR_HOVER_ENTS[entity:GetClass()] or entity.crosshairHoverEnt == true) then return true end
 end
 
