@@ -255,11 +255,11 @@ function PANEL:Paint(width, height)
 
             --player health
             local plyHealth = ply:Health() or 0
-            local plyHealthTicks = math.floor(plyHealth / 3.125) < 32 and math.floor(plyHealth / 3.125) or 32
+            local plyHealthTicks = math.Round((plyHealth / LocalPlayer():GetMaxHealth()) * 32) or 32
 
             --player stamina
             local plyAP = ply:GetLocalVar("stm", 100)
-            local plyAPTicks = math.floor(plyAP / 3.125) < 32 and math.floor(plyAP / 3.125) or 32
+            local plyAPTicks = math.Round(plyAP * 0.32)
 
             --player water
             local plyOxygen = math.floor(ply:GetLocalVar("o2") ~= nil and (ply:GetLocalVar("o2") / 6.66) < 15 and math.floor(ply:GetLocalVar("o2") / 6.66) or -1)
