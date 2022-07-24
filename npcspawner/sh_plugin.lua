@@ -13,6 +13,14 @@ CAMI.RegisterPrivilege({
     MinAccess = "admin"
 })
 
+if (SERVER) then
+    function PLUGIN:OnNPCKilled(npc, attacker, inflictor)
+        if (npc.spawnerEnt) then
+            npc.spawnerEnt:NPCKilled()
+        end
+    end
+end
+
 local playerMeta = FindMetaTable("Player")
 function playerMeta:CanUseNPCSpawner()
     return CAMI.PlayerHasAccess(self, "Helix - NPC Spawner", nil)

@@ -1,6 +1,6 @@
 ENT.Type = "anim"
 ENT.PrintName = "NPC Spawner"
-ENT.Category = "Fallout RP"
+ENT.Category = "Helix"
 ENT.Spawnable = true
 ENT.AdminOnly = true
 ENT.bNoPersist = true
@@ -111,6 +111,7 @@ if (SERVER) then
                 }
                 local trace = util.TraceLine(data)
                 local spawnerNPC = ents.Create(self:GetNPCClass())
+                spawnerNPC.spawnerEnt = self
                 spawnerNPC:SetPos(trace.HitPos + Vector(0, 0, 16))
                 local retries = 100
                 local npcStuck = util.TraceEntity({start = spawnerNPC:GetPos(), endpos = spawnerNPC:GetPos(), filter = spawnerNPC}, spawnerNPC).StartSolid
@@ -141,6 +142,11 @@ if (SERVER) then
                 end
             end
         end
+    end
+
+    function ENT:NPCKilled()
+        table.remove(self.spawnedNPCs)
+        self:SetSpawnedNPCs(#self.spawnedNPCs)
     end
 
     function ENT:OnRemove()
