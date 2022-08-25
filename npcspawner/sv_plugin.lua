@@ -21,7 +21,8 @@ function PLUGIN:SaveData()
             spawnInterval = entity:GetSpawnInterval(),
             npcRadius = entity:GetNPCSpawnRadius(),
             playerRadius = entity:GetPlayerRadius(),
-            spawnAmount = entity:GetSpawnAmount()
+            spawnAmount = entity:GetSpawnAmount(),
+            npcClass = entity:GetNPCClass()
         }
     end
 
@@ -51,6 +52,7 @@ function PLUGIN:LoadData()
         entity:SetNPCSpawnRadius(v.npcRadius)
         entity:SetPlayerRadius(v.playerRadius)
         entity:SetSpawnAmount(v.spawnAmount)
+        entity:SetNPCClass(v.npcClass)
         entity:Spawn()
     end
 end
