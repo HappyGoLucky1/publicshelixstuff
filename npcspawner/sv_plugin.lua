@@ -5,7 +5,7 @@ util.AddNetworkString("npcSpawnerSaveChanges")
 
 ix.log.AddType("npcSpawner", function(client, ...)
     local arg = {...}
-    return L("npcSpawnerLog", client, client:Name(), arg[1])
+    return L("npcSpawnerLog", client[1], client[1]:Name(), arg[1])
 end, FLAG_WARNING)
 
 function PLUGIN:SaveData()
@@ -22,7 +22,8 @@ function PLUGIN:SaveData()
             npcRadius = entity:GetNPCSpawnRadius(),
             playerRadius = entity:GetPlayerRadius(),
             spawnAmount = entity:GetSpawnAmount(),
-            npcClass = entity:GetNPCClass()
+            npcClass = entity:GetNPCClass(),
+            weaponClass = entity:GetWeaponClass()
         }
     end
 
@@ -53,6 +54,7 @@ function PLUGIN:LoadData()
         entity:SetPlayerRadius(v.playerRadius)
         entity:SetSpawnAmount(v.spawnAmount)
         entity:SetNPCClass(v.npcClass)
+        entity:SetWeaponClass(v.weaponClass)
         entity:Spawn()
     end
 end
@@ -64,6 +66,7 @@ net.Receive("npcSpawnerSaveChanges", function(len, client)
     local entity = net.ReadEntity()
     local enabledBool = net.ReadBool()
     local npcClass = net.ReadString()
+    local weaponClass = net.ReadString()
     local playerRadius = net.ReadUInt(14)
     local npcSpawnRadius = net.ReadUInt(14)
     local maxNPCs = net.ReadUInt(8)
@@ -77,6 +80,10 @@ net.Receive("npcSpawnerSaveChanges", function(len, client)
     if (entity:GetNPCClass() != npcClass) then
         changes[#changes + 1] = "NPC Class: " .. entity:GetNPCClass() .. " > " .. npcClass
         entity:SetNPCClass(npcClass)
+    end
+    if (entity:GetWeaponClass() != weaponClass) then
+        changes[#changes + 1] = "Weapon Class : " .. entity:GetWeaponClass() .. " > " .. weaponClass
+        entity:SetWeaponClass(weaponClass)
     end
     if (entity:GetPlayerRadius() != playerRadius) then
         changes[#changes + 1] = "Player Radius: " .. entity:GetPlayerRadius() .. " > " .. playerRadius
@@ -104,6 +111,8 @@ net.Receive("npcSpawnerSaveChanges", function(len, client)
     end
 
     if (changeString != "") then
-        ix.log.Add(client, "npcSpawner", changeString)
+        CAMI.GetPlayersWithAccess("Helix - NPC Spawner", function(ply)
+            ix.log.Add(ply, "npcSpawner", changeString)
+        end)
     end
 end)

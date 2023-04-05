@@ -14,6 +14,7 @@ function ENT:SetupDataTables()
     self:NetworkVar("Int", 4, "PlayerRadius")
     self:NetworkVar("Int", 5, "SpawnedNPCs")
     self:NetworkVar("String", 0, "NPCClass")
+    self:NetworkVar("String", 1, "WeaponClass")
 
     self:SetEnabled(false)
     self:SetMaxNPCs(4)
@@ -85,6 +86,7 @@ if (SERVER) then
     end
 
     function ENT:SpawnNPCs()
+        local npcData = list.Get("NPC")[self:GetNPCClass()]
         local currentNPCs = #self.spawnedNPCs
         local spawnAmount = self:GetSpawnAmount()
         spawnAmount = currentNPCs + spawnAmount <= self:GetMaxNPCs() and spawnAmount or self:GetMaxNPCs() - currentNPCs
@@ -135,8 +137,24 @@ if (SERVER) then
                 end
 
                 if (spawnerNPC) then
+                    if (self:GetWeaponClass() and self:GetWeaponClass() != "none" or self:GetWeaponClass() != "") then
+                        local valid = false
+                        for _, v in pairs( list.Get( "NPCUsableWeapons" ) ) do
+                            if v.class == self:GetWeaponClass() then valid = true break end
+                        end
+                        for _, v in pairs( npcData.Weapons or {} ) do
+                            if v == self:GetWeaponClass() then valid = true break end
+                        end
+
+                        if (valid) then
+                            spawnerNPC:SetKeyValue("additionalequipment", self:GetWeaponClass())
+                            spawnerNPC.Equipment = self:GetWeaponClass()
+                        end
+                    end
+
                     spawnerNPC:SetPos(trace.HitPos + Vector(0, 0, 16))
                     spawnerNPC:Spawn()
+                    spawnerNPC:Activate()
                     self.spawnedNPCs[#self.spawnedNPCs + 1] = spawnerNPC
                     self:SetSpawnedNPCs(#self.spawnedNPCs)
                 end
@@ -190,6 +208,10 @@ else
             local npcClass = container:AddRow("npcClass")
             npcClass:SetText(L"npcSpawnerNPCClass" .. ": " .. self:GetNPCClass())
             npcClass:SizeToContents()
+
+            local weaponClass = container:AddRow("weaponClass")
+            weaponClass:SetText(L"npcSpawnerWeaponClass" .. ": " .. self:GetWeaponClass())
+            weaponClass:SizeToContents()
 
             local maxNPCs = container:AddRow("maxNPCs")
             maxNPCs:SetText(L"npcSpawnerMaxNPCs" .. ": " .. self:GetMaxNPCs())

@@ -10,6 +10,7 @@ LANGUAGE = {
 
     npcSpawnerEnabled = "Enabled",
     npcSpawnerNPCClass = "NPC Class",
+    npcSpawnerWeaponClass = "Weapon Class",
     npcSpawnerNPCRadius = "Spawn Radius",
     npcSpawnerPlayerRadius = "Player Deactivation Radius",
     npcSpawnerMaxNPCs = "Max NPCs",
