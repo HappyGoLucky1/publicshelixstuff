@@ -93,6 +93,7 @@ if (SERVER) then
         local spawnerPos = self:GetPos()
         local playerRadius = self:GetPlayerRadius()
         local squaredBlockRadius = playerRadius * playerRadius
+        local weaponClass = self:GetWeaponClass()
 
         if (self:GetEnabled() and self:GetMaxNPCs() > currentNPCs) then
             for k, client in pairs(player.GetAll()) do
@@ -137,18 +138,19 @@ if (SERVER) then
                 end
 
                 if (spawnerNPC) then
-                    if (self:GetWeaponClass() and self:GetWeaponClass() != "none" or self:GetWeaponClass() != "") then
+                    weaponClass = table.Random(string.Split(weaponClass, ", "))
+                    if (weaponClass and weaponClass != "none" or weaponClass != "") then
                         local valid = false
                         for _, v in pairs( list.Get( "NPCUsableWeapons" ) ) do
-                            if v.class == self:GetWeaponClass() then valid = true break end
+                            if v.class == weaponClass then valid = true break end
                         end
                         for _, v in pairs( npcData.Weapons or {} ) do
-                            if v == self:GetWeaponClass() then valid = true break end
+                            if v == weaponClass then valid = true break end
                         end
 
                         if (valid) then
-                            spawnerNPC:SetKeyValue("additionalequipment", self:GetWeaponClass())
-                            spawnerNPC.Equipment = self:GetWeaponClass()
+                            spawnerNPC:SetKeyValue("additionalequipment", weaponClass)
+                            spawnerNPC.Equipment = weaponClass
                         end
                     end
 
