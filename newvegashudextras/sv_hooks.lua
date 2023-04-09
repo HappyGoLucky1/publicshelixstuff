@@ -46,18 +46,19 @@ end
 
 function PLUGIN:EntityFireBullets(entity, bulletInfo)
 	local weaponItem = entity:GetActiveWeapon().ixItem
-	if (not weaponItem) then return end
-	local itemConditionDrainFactor = weaponItem.conditionDrainFactor or 1
-	local weaponConditionDrain = ix.config.Get("weaponConditionDrainRate", 1) * itemConditionDrainFactor
+	if (weaponItem) then
+		local itemConditionDrainFactor = weaponItem.conditionDrainFactor or 1
+		local weaponConditionDrain = ix.config.Get("weaponConditionDrainRate", 1) * itemConditionDrainFactor
 
-	if (entity:IsPlayer() and weaponItem) then
-		local condition = weaponItem:GetData("condition", 100)
+		if (entity:IsPlayer() and weaponItem) then
+			local condition = weaponItem:GetData("condition", 100)
 
-		weaponItem:SetData("condition", math.Clamp(math.Round(condition - weaponConditionDrain, 2), 0, 100))
-		entity:SetLocalVar("activeWeaponCondition", math.Clamp(math.Round(condition - weaponConditionDrain, 2), 0, 100))
+			weaponItem:SetData("condition", math.Clamp(math.Round(condition - weaponConditionDrain, 2), 0, 100))
+			entity:SetLocalVar("activeWeaponCondition", math.Clamp(math.Round(condition - weaponConditionDrain, 2), 0, 100))
 
-		if (weaponItem:GetData("condition") <= 0) then
-			weaponItem:OnBreak(entity)
+			if (weaponItem:GetData("condition") <= 0) then
+				weaponItem:OnBreak(entity)
+			end
 		end
 	end
 end
@@ -67,14 +68,15 @@ function PLUGIN:EntityTakeDamage(victim, dmgInfo)
 
 	if (attacker:IsPlayer()) then
 		local weaponItem = dmgInfo:GetAttacker():GetActiveWeapon().ixItem
-		if (not weaponItem) then return end
-		local condition = weaponItem:GetData("condition", 100)
+		if (weaponItem) then
+			local condition = weaponItem:GetData("condition", 100)
 
-		if (ix.config.Get("bulletDamageBasedOnWeaponCondition", true)) then
-			condition = condition / 100
-			condition = 0.5 + math.min((0.5 * condition / 0.75), 0.5)
+			if (ix.config.Get("bulletDamageBasedOnWeaponCondition", true)) then
+				condition = condition / 100
+				condition = 0.5 + math.min((0.5 * condition / 0.75), 0.5)
 
-			dmgInfo:SetDamage(math.Round(dmgInfo:GetDamage() * condition, 2))
+				dmgInfo:SetDamage(math.Round(dmgInfo:GetDamage() * condition, 2))
+			end
 		end
 	end
 end
