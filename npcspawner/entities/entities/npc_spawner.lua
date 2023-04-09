@@ -59,7 +59,7 @@ end
 
 if (SERVER) then
     function ENT:Use(activator)
-        if (activator:CanUseNPCSpawner() and activator:GetMoveType() == MOVETYPE_NOCLIP) then
+        if (hook.Run("CanPlayerUseNPCSpawner", activator) and activator:GetMoveType() == MOVETYPE_NOCLIP) then
 
             net.Start("npcSpawnerOpen")
                 net.WriteEntity(self)
