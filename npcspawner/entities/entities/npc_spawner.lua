@@ -197,7 +197,7 @@ else
     ENT.PopulateEntityInfo = true
 
     function ENT:OnPopulateEntityInfo(container)
-        if (LocalPlayer():CanUseNPCSpawner() and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
+        if (hook.Run("CanPlayerUseNPCSpawner", LocalPlayer()) and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
             local name = container:AddRow("name")
             name:SetImportant()
             name:SetText(L"npcSpawner")
