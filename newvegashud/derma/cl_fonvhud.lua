@@ -1,7 +1,7 @@
 
 --load up the materials
     local leftHUDElement = Material("fonvui/hud/hud_left_main.png", "smooth")
-    local compassStrip = Material("fonvui/hud/compass.vtf", "noclamp")
+    local compassStrip = Material("fonvui/hud/compass.png", "noclamp")
     --bruh how am i gonna do this
     local compassAlphaRT = GetRenderTargetEx("CompassAlphaRT", 1024, 64, RT_SIZE_OFFSCREEN, MATERIAL_RT_DEPTH_SHARED, 0, 0, IMAGE_FORMAT_RGBA8888)
     local compassAlphaRTMat = CreateMaterial("CompassAlphaRTMask", "UnlitGeneric", {
