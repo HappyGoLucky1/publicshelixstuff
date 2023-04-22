@@ -1,15 +1,14 @@
 
 --load up the materials
     local leftHUDElement = Material("fonvui/hud/hud_left_main.png", "smooth")
-    local compassStrip = Material("hud/compass.vtf", "noclamp")
+    local compassStrip = Material("fonvui/hud/compass.vtf", "noclamp")
     --bruh how am i gonna do this
     local compassAlphaRT = GetRenderTargetEx("CompassAlphaRT", 1024, 64, RT_SIZE_OFFSCREEN, MATERIAL_RT_DEPTH_SHARED, 0, 0, IMAGE_FORMAT_RGBA8888)
     local compassAlphaRTMat = CreateMaterial("CompassAlphaRTMask", "UnlitGeneric", {
         ["$basetexture"] = compassAlphaRT:GetName(),
         ["$translucent"] = "1"
     })
-    local compassAlphaMask = Material("fonvui/hud/hud_compass_alphamap.png", "smooth")
-    --local compassAlphaMask = Material("gui/gradient", "smooth")
+    local compassAlphaMask = Material("fonvui/hud/alpha_map.png", "smooth")
 
     local rightHUDElement = Material("fonvui/hud/hud_right_main.png", "smooth")
     local conditionBar = Material("fonvui/hud/hud_condition_bar.png")
@@ -236,6 +235,10 @@ function PANEL:AddNotification(text, icon, duration)
     return queueIndex
 end
 
+function PANEL:OnScreenSizeChanged()
+    self:Paint(ScrW(), ScrH())
+end
+
 function PANEL:Paint(width, height)
     if (LocalPlayer():Alive() and LocalPlayer():GetCharacter()) then
         --hud texture sizes
@@ -306,53 +309,35 @@ function PANEL:Paint(width, height)
             surface.DrawTexturedRect(width * 0.04 + (ticks * (tickMarkWidth / 2)), height * 0.85, tickMarkWidth, tickMarkHeight)
         end
 
-        --[[compass
+        --compass
         render.PushRenderTarget(compassAlphaRT)
             cam.Start2D()
                 render.Clear( 0, 0, 0, 0 )
                 surface.SetDrawColor(HUDColor)
                 surface.SetMaterial(compassStrip)
 
-                local percX, percY = ((-ply:GetAngles().y / 360) * 1024 + 112) / 1024, 0 / 64
+                local percX, percY = ((-ply:GetAngles().y / 360) * 1024 + 135) / 1024, 0 / 64
                 local percW, percH = 336 / 1024, 64 / 64
                 local vertices = {
                     {x = 0, y = 0, u = percX, v = percY},
-                    {x = 0, y = 0, u = percX + percW, v = percY},
-                    {x = 0, y = 0, u = percX + percW, v = percY + percH},
-                    {x = 0, y = 0, u = percX, v = percY + percH}
+                    {x = width * 1024 / 1600, y = 0, u = percX + percW, v = percY},
+                    {x = width * 1024 / 1600, y = height * 64 / 900, u = percX + percW, v = percY + percH},
+                    {x = 0, y = height * 64 / 900, u = percX, v = percY + percH}
                 }
                 surface.DrawPoly(vertices)
-                surface.DrawTexturedRect(0,0, 1024,64)
-                surface.DrawTexturedRectRotated( 1024 / 2, 64 / 2, 1024, 64, CurTime() * 20 )
 
                 render.SetWriteDepthToDestAlpha( false )
                     render.OverrideBlend( true, BLEND_SRC_COLOR, BLEND_SRC_ALPHA, BLENDFUNC_MIN )
                         surface.SetMaterial( compassAlphaMask )
-                        surface.DrawTexturedRect( 0, 0, 1024, 64 )
+                        surface.DrawTexturedRect( width * 725 / 1600, 0, width * 400 / 1600, height * 64 / 900 )
                     render.OverrideBlend( false )
                 render.SetWriteDepthToDestAlpha( true )
-                --surface.SetDrawColor(Color(255,255,255))
-                --surface.SetMaterial(compassAlphaMap)
-                --surface.DrawTexturedRect(70, ScrH()-100, 336, 64)
             cam.End2D()
         render.PopRenderTarget()
 
         surface.SetDrawColor(HUDColor)
         surface.SetMaterial(compassAlphaRTMat)
-        surface.DrawTexturedRect(70, ScrH() - 100, 406, 64 )--]]
-        --compass
-        surface.SetDrawColor(HUDColor)
-        surface.SetMaterial(compassStrip)
-
-        local percX, percY = ((-ply:GetAngles().y / 360) * 1024 + 109) / 1024, 0 / 64
-        local percW, percH = 336 / 1024, 64 / 64
-        local vertices = {
-            {x = width * 0.04375, y = height * 0.88, u = percX, v = percY},
-            {x = width * 0.25375, y = height * 0.88, u = percX + percW, v = percY},
-            {x = width * 0.25375, y = height * 0.96, u = percX + percW, v = percY + percH},
-            {x = width * 0.04375, y = height * 0.96, u = percX, v = percY + percH}
-        }
-        surface.DrawPoly(vertices)
+        surface.DrawTexturedRect(width * 0.04375, height * 0.889, 406, 64 )
 
         --right hud elements
         --right main hud frame
