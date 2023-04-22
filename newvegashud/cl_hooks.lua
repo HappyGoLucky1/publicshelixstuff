@@ -3,22 +3,22 @@ local PLUGIN = PLUGIN
 function PLUGIN:LoadFonts(font, genericFont)
 	surface.CreateFont("Monofonto_HUD", {
 		font = "Monofonto",
-		size = 30,
+		size = ScreenScale(12),
 		weight = 500
 	})
 	surface.CreateFont("Monofonto_HUD_Ammo", {
 		font = "Monofonto",
-		size = 38,
+		size = ScreenScale(15),
 		weight = 500
 	})
 	surface.CreateFont("Monofonto_HUD_Ammo_Secondary", {
 		font = "Monofonto",
-		size = 24,
+		size = ScreenScale(10),
 		weight = 500
 	})
 	surface.CreateFont("Monofonto_Medium", {
 		font = "Monofonto",
-		size = 30,
+		size = ScreenScale(14),
 		weight = 500
 	})
 end

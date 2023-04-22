@@ -12,5 +12,5 @@ ix.option.Add("hudColor", ix.type.color, Color(255,111,76,255), {
 })
 
 ix.config.Add("showExplosiveIndicator", true, "Should the explosive indicator show?", nil, {
-    category = "fonvHUDConfig"
+    category = "fonvHUD"
 })

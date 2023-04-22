@@ -1,9 +1,15 @@
 
 --load up the materials
     local leftHUDElement = Material("fonvui/hud/hud_left_main.png", "smooth")
-    local compassStrip = Material("fonvui/hud/hud_compass_strip.png", "noclamp")
+    local compassStrip = Material("hud/compass.vtf", "noclamp")
     --bruh how am i gonna do this
-    --local compassAlphaMap = Material("fonvui/hud/hud_compass_alphamap.png")
+    local compassAlphaRT = GetRenderTargetEx("CompassAlphaRT", 1024, 64, RT_SIZE_OFFSCREEN, MATERIAL_RT_DEPTH_SHARED, 0, 0, IMAGE_FORMAT_RGBA8888)
+    local compassAlphaRTMat = CreateMaterial("CompassAlphaRTMask", "UnlitGeneric", {
+        ["$basetexture"] = compassAlphaRT:GetName(),
+        ["$translucent"] = "1"
+    })
+    local compassAlphaMask = Material("fonvui/hud/hud_compass_alphamap.png", "smooth")
+    --local compassAlphaMask = Material("gui/gradient", "smooth")
 
     local rightHUDElement = Material("fonvui/hud/hud_right_main.png", "smooth")
     local conditionBar = Material("fonvui/hud/hud_condition_bar.png")
@@ -95,25 +101,6 @@
     --hud text info
     local textOutlineWidth = 2.25
 
-    --hud texture sizes
-    local leftHUDElementWidth, leftHUDElementHeight = leftHUDElement:GetTexture("$basetexture"):Width(), leftHUDElement:GetTexture("$basetexture"):Height()
-
-    local rightHUDElementWidth, rightHUDElementHeight = rightHUDElement:GetTexture("$basetexture"):Width(), rightHUDElement:GetTexture("$basetexture"):Height()
-    local conditionBarWidth, conditionBarHeight = 70, 22
-    local conditionTriangleWidth, conditionTriangleHeight = conditionTriangle:GetTexture("$basetexture"):Width(), conditionTriangle:GetTexture("$basetexture"):Height()
-
-    local tickMarkWidth, tickMarkHeight = mainTickMark:GetTexture("$basetexture"):Width(), mainTickMark:GetTexture("$basetexture"):Height()
-
-    local crosshairWidth, crosshairHeight = crosshair:GetTexture("$basetexture"):Width(), crosshair:GetTexture("$basetexture"):Height()
-    local crosshairHoverWidth, crosshairHoverHeight = crosshairHover:GetTexture("$basetexture"):Width(), crosshairHover:GetTexture("$basetexture"):Height()
-
-    local explosiveIndicatorWidth, explosiveIndicatorHeight = explosiveIndicator:GetTexture("$basetexture"):Width(), explosiveIndicator:GetTexture("$basetexture"):Height()
-
-    local oxygenIndicatorWidth, oxygenIndicatorHeight = oxygenIndicator:GetTexture("$basetexture"):Width(), oxygenIndicator:GetTexture("$basetexture"):Height()
-    local oxygenIndicatorTickWidth, oxygenIndicatorTickHeight = oxygenIndicatorTick:GetTexture("$basetexture"):Width(), oxygenIndicatorTick:GetTexture("$basetexture"):Height()
-
-    local notificationSeperatorWidth, notificationSeperatorHeight = notificationSeperator:GetTexture("$basetexture"):Width() * .75 , notificationSeperator:GetTexture("$basetexture"):Height() * .55
-
     local iconSizes = {}
     --change how this i do icon sizes and shit later
     for name, material in pairs(messageIcons) do
@@ -163,12 +150,13 @@ function PANEL:Init()
 
     self.notificationPanel = vgui.Create("Panel", self)
     self.notificationPanel:SetPos(0, 0)
-    self.notificationPanel:SetSize(ScrW(), ScrH())
+    self.notificationPanel:SetSize(self:GetWide(), self:GetTall())
     self.notificationPanel.currentAlpha = 0
     self.notificationPanel:SetAlpha(self.notificationPanel.currentAlpha)
     self.notificationPanel.fadeInAnimation = nil
     self.notificationPanel.fadeOutAnimation = nil
     self.notificationPanel.Paint = function()
+        local notificationSeperatorWidth, notificationSeperatorHeight = ScrW() * notificationSeperator:GetTexture("$basetexture"):Width() * .75 / 1600, ScrH() * notificationSeperator:GetTexture("$basetexture"):Height() * .55 / 900
         local HUDColor = Color(ix.option.Get("hudColor").r, ix.option.Get("hudColor").g, ix.option.Get("hudColor").b, ix.option.Get("hudColor").a)
         local HUDTextOutlineColor = Color(HUDColor.r, HUDColor.g, HUDColor.b, 2)
         local HUDTextSecondOutlineColor = Color(HUDColor.r * 0.10, HUDColor.g * 0.10, HUDColor.b * 0.10, 30)
@@ -200,11 +188,11 @@ function PANEL:Init()
 
                 surface.SetDrawColor(HUDColor)
                 surface.SetMaterial(notificationSeperator)
-                surface.DrawTexturedRect(50, ScrH() * 0.037, notificationSeperatorWidth, notificationSeperatorHeight)
+                surface.DrawTexturedRect(50, self:GetTall() * 0.037, notificationSeperatorWidth, notificationSeperatorHeight)
 
                 surface.SetDrawColor(HUDColor)
                 surface.SetMaterial(self.currentNotification.icon)
-                surface.DrawTexturedRect(31, ScrH() * 0.03, iconSizes[self.currentNotification.icon].w, iconSizes[self.currentNotification.icon].h)
+                surface.DrawTexturedRect(31, self:GetTall() * 0.03, ScrW() * iconSizes[self.currentNotification.icon].w / 1600, ScrH() * iconSizes[self.currentNotification.icon].h / 900)
 
                 local currentNotificationText = self.currentNotification.text
 
@@ -250,16 +238,34 @@ end
 
 function PANEL:Paint(width, height)
     if (LocalPlayer():Alive() and LocalPlayer():GetCharacter()) then
+        --hud texture sizes
+        local leftHUDElementWidth, leftHUDElementHeight = ScrW() * leftHUDElement:GetTexture("$basetexture"):Width() / 1600,  ScrH() * leftHUDElement:GetTexture("$basetexture"):Height() / 900
+
+        local rightHUDElementWidth, rightHUDElementHeight = ScrW() * rightHUDElement:GetTexture("$basetexture"):Width() / 1600, ScrH() * rightHUDElement:GetTexture("$basetexture"):Height() / 900
+        local conditionBarWidth, conditionBarHeight = 70, 22
+        local conditionTriangleWidth, conditionTriangleHeight = ScrW() * conditionTriangle:GetTexture("$basetexture"):Width() / 1600, ScrH() * conditionTriangle:GetTexture("$basetexture"):Height() / 900
+
+        local tickMarkWidth, tickMarkHeight = ScrW() * mainTickMark:GetTexture("$basetexture"):Width() / 1600, ScrH() * mainTickMark:GetTexture("$basetexture"):Height() / 900
+
+        local crosshairWidth, crosshairHeight = ScrW() * crosshair:GetTexture("$basetexture"):Width() / 1600, ScrH() * crosshair:GetTexture("$basetexture"):Height() / 900
+        local crosshairHoverWidth, crosshairHoverHeight = ScrW() * crosshairHover:GetTexture("$basetexture"):Width() / 1600, ScrH() * crosshairHover:GetTexture("$basetexture"):Height() / 900
+
+        local explosiveIndicatorWidth, explosiveIndicatorHeight = ScrW() * explosiveIndicator:GetTexture("$basetexture"):Width() / 1600, ScrH() * explosiveIndicator:GetTexture("$basetexture"):Height() / 900
+
+        local oxygenIndicatorWidth, oxygenIndicatorHeight = ScrW() * oxygenIndicator:GetTexture("$basetexture"):Width() / 1600, ScrH() * oxygenIndicator:GetTexture("$basetexture"):Height() / 900
+        local oxygenIndicatorTickWidth, oxygenIndicatorTickHeight = ScrW() * oxygenIndicatorTick:GetTexture("$basetexture"):Width() / 1600, ScrH() * oxygenIndicatorTick:GetTexture("$basetexture"):Height() / 900
+
         --player info
         local ply = LocalPlayer()
 
             --player health
             local plyHealth = ply:Health() or 0
-            local plyHealthTicks = math.Round((plyHealth / LocalPlayer():GetMaxHealth()) * 32) or 32
+            --local plyHealthTicks = math.floor(plyHealth / 3.125) < 32 and math.floor(plyHealth / 3.125) or 32
+            local plyHealthTicks = math.Round((plyHealth / LocalPlayer():GetMaxHealth()) * 32)
 
             --player stamina
             local plyAP = ply:GetLocalVar("stm", 100)
-            local plyAPTicks = math.Round(plyAP * 0.32)
+            local plyAPTicks = plyAP * 0.32
 
             --player water
             local plyOxygen = math.floor(ply:GetLocalVar("o2") ~= nil and (ply:GetLocalVar("o2") / 6.66) < 15 and math.floor(ply:GetLocalVar("o2") / 6.66) or -1)
@@ -288,68 +294,98 @@ function PANEL:Paint(width, height)
         --left main hud frame
         surface.SetDrawColor(HUDColor)
         surface.SetMaterial(leftHUDElement)
-        surface.DrawTexturedRect(50, ScrH() - (leftHUDElementHeight / 1.5), leftHUDElementWidth, leftHUDElementHeight)
+        surface.DrawTexturedRect(width * 0.03125, height * 0.81, leftHUDElementWidth, leftHUDElementHeight)
 
         --HP text
-        TextDoubleOutlined("HP", "Monofonto_HUD", 75, ScrH() - (leftHUDElementHeight / 1.5), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+        TextDoubleOutlined("HP", "Monofonto_HUD", width * 0.046875, height * 0.815, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
 
         --HP ticks
         for ticks = 0, plyHealthTicks do
-            surface.SetDrawColor(HUDTickColor.r, HUDTickColor.g, HUDTickColor.b, 150)
+            surface.SetDrawColor(HUDTickColor.r, HUDTickColor.g, HUDTickColor.b, 120)
             surface.SetMaterial(mainTickMark)
-            surface.DrawTexturedRect(64 + (ticks * (tickMarkWidth / 2)), ScrH() - (leftHUDElementHeight / 1.89), tickMarkWidth, tickMarkHeight)
+            surface.DrawTexturedRect(width * 0.04 + (ticks * (tickMarkWidth / 2)), height * 0.85, tickMarkWidth, tickMarkHeight)
         end
 
+        --[[compass
+        render.PushRenderTarget(compassAlphaRT)
+            cam.Start2D()
+                render.Clear( 0, 0, 0, 0 )
+                surface.SetDrawColor(HUDColor)
+                surface.SetMaterial(compassStrip)
+
+                local percX, percY = ((-ply:GetAngles().y / 360) * 1024 + 112) / 1024, 0 / 64
+                local percW, percH = 336 / 1024, 64 / 64
+                local vertices = {
+                    {x = 0, y = 0, u = percX, v = percY},
+                    {x = 0, y = 0, u = percX + percW, v = percY},
+                    {x = 0, y = 0, u = percX + percW, v = percY + percH},
+                    {x = 0, y = 0, u = percX, v = percY + percH}
+                }
+                surface.DrawPoly(vertices)
+                surface.DrawTexturedRect(0,0, 1024,64)
+                surface.DrawTexturedRectRotated( 1024 / 2, 64 / 2, 1024, 64, CurTime() * 20 )
+
+                render.SetWriteDepthToDestAlpha( false )
+                    render.OverrideBlend( true, BLEND_SRC_COLOR, BLEND_SRC_ALPHA, BLENDFUNC_MIN )
+                        surface.SetMaterial( compassAlphaMask )
+                        surface.DrawTexturedRect( 0, 0, 1024, 64 )
+                    render.OverrideBlend( false )
+                render.SetWriteDepthToDestAlpha( true )
+                --surface.SetDrawColor(Color(255,255,255))
+                --surface.SetMaterial(compassAlphaMap)
+                --surface.DrawTexturedRect(70, ScrH()-100, 336, 64)
+            cam.End2D()
+        render.PopRenderTarget()
+
+        surface.SetDrawColor(HUDColor)
+        surface.SetMaterial(compassAlphaRTMat)
+        surface.DrawTexturedRect(70, ScrH() - 100, 406, 64 )--]]
         --compass
         surface.SetDrawColor(HUDColor)
         surface.SetMaterial(compassStrip)
 
-        local percX, percY = ((-ply:GetAngles().y / 360) * 1024 + 112) / 1024, 0 / 64
+        local percX, percY = ((-ply:GetAngles().y / 360) * 1024 + 109) / 1024, 0 / 64
         local percW, percH = 336 / 1024, 64 / 64
         local vertices = {
-            {x = 70, y = ScrH() - 100, u = percX, v = percY},
-            {x = 70 + 336, y = ScrH() - 100, u = percX + percW, v = percY},
-            {x = 70 + 336, y = (ScrH() - 100) + 64, u = percX + percW, v = percY + percH},
-            {x = 70, y = (ScrH() - 100) + 64, u = percX, v = percY + percH}
+            {x = width * 0.04375, y = height * 0.88, u = percX, v = percY},
+            {x = width * 0.25375, y = height * 0.88, u = percX + percW, v = percY},
+            {x = width * 0.25375, y = height * 0.96, u = percX + percW, v = percY + percH},
+            {x = width * 0.04375, y = height * 0.96, u = percX, v = percY + percH}
         }
         surface.DrawPoly(vertices)
-
-        --surface.SetDrawColor(Color(255,255,255))
-        --surface.SetMaterial(compassAlphaMap)
-        --surface.DrawTexturedRect(70, ScrH()-100, 336, 64)
 
         --right hud elements
         --right main hud frame
         surface.SetDrawColor(HUDColor)
         surface.SetMaterial(rightHUDElement)
-        surface.DrawTexturedRect(ScrW() - (rightHUDElementWidth + 50), ScrH() - (rightHUDElementHeight / 1.5), rightHUDElementWidth, rightHUDElementHeight)
+        surface.DrawTexturedRect(width * 0.731, height * 0.81, rightHUDElementWidth, rightHUDElementHeight)
 
         --AP ticks
-        TextDoubleOutlined("AP", "Monofonto_HUD", ScrW() - 82 - rightHUDElementWidth / 22, ScrH() - (leftHUDElementHeight / 1.5), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+        TextDoubleOutlined("AP", "Monofonto_HUD", width * 0.938, height * 0.815, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
 
         --AP ticks
         for ticks = 0, plyAPTicks do
-            surface.SetDrawColor(HUDTickColor.r, HUDTickColor.g, HUDTickColor.b, 150)
+            surface.SetDrawColor(HUDTickColor.r, HUDTickColor.g, HUDTickColor.b, 120)
             surface.SetMaterial(mainTickMark)
-            surface.DrawTexturedRect((ScrW() - 64 - rightHUDElementWidth / 22) - (ticks * (tickMarkWidth / 2)), ScrH() - (leftHUDElementHeight / 1.89), tickMarkWidth, tickMarkHeight)
+            surface.DrawTexturedRect(width * 0.949 - (ticks * (tickMarkWidth / 2)), height * 0.85, tickMarkWidth, tickMarkHeight)
         end
 
         --Weapon condition
         if (activeWepPrimaryAmmo ~= -1 and plyActiveWeaponCondition ~= nil) then
-            TextDoubleOutlined("CND", "Monofonto_HUD", ScrW() - (rightHUDElementWidth * 1.07), ScrH() - rightHUDElementHeight / 2.78, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+            TextDoubleOutlined("CND", "Monofonto_HUD", width - (rightHUDElementWidth * 1.07), height - rightHUDElementHeight / 2.78, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
 
             surface.SetDrawColor(HUDDarkColor)
             surface.SetMaterial(conditionBar)
-            surface.DrawTexturedRect(ScrW() - (rightHUDElementWidth * 0.95), ScrH() - rightHUDElementHeight / 2.92, conditionBarWidth, conditionBarHeight)
+            surface.DrawTexturedRect(width - (rightHUDElementWidth * 0.95), height - rightHUDElementHeight / 2.92, conditionBarWidth, conditionBarHeight)
 
             surface.SetDrawColor(HUDColor)
             surface.SetMaterial(conditionBar)
-            surface.DrawTexturedRect(ScrW() - (rightHUDElementWidth * 0.95), ScrH() - rightHUDElementHeight / 2.92, plyActiveWeaponCondition * 0.7, conditionBarHeight)
+            surface.DrawTexturedRect(width - (rightHUDElementWidth * 0.95), height - rightHUDElementHeight / 2.92, plyActiveWeaponCondition * 0.7, conditionBarHeight)
 
             surface.SetDrawColor(Color(0,0,0))
             surface.SetMaterial(conditionTriangle)
-            surface.DrawTexturedRect(ScrW() - (rightHUDElementWidth * 0.8325), ScrH() - rightHUDElementHeight / 2.92, conditionTriangleWidth, conditionTriangleHeight)
-            surface.DrawTexturedRectRotated(ScrW() - (rightHUDElementWidth * 0.8125), ScrH() - rightHUDElementHeight / 3.50, conditionTriangleWidth, conditionTriangleHeight, 180)
+            surface.DrawTexturedRect(width - (rightHUDElementWidth * 0.8325), height - rightHUDElementHeight / 2.92, conditionTriangleWidth, conditionTriangleHeight)
+            surface.DrawTexturedRectRotated(width - (rightHUDElementWidth * 0.8125), height - rightHUDElementHeight / 3.50, conditionTriangleWidth, conditionTriangleHeight, 180)
         end
 
         --Ammo indicator
@@ -359,16 +395,16 @@ function PANEL:Paint(width, height)
 
             ammoText = plyPrimaryAmmo or ammoText and ErrorNoHalt("Failed to get new value for primary reserve ammo text.\n")
             surface.SetFont("Monofonto_HUD_Ammo")
-            local reserveAmmoWidth = surface.GetTextSize(ammoText)
-            TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo", ScrW() - (55 + reserveAmmoWidth) - rightHUDElementWidth / 22, ScrH() - (leftHUDElementHeight / 2.65), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+            local reserveAmmoWidth = width * surface.GetTextSize(ammoText) / 1600
+            TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo", width - (55 + reserveAmmoWidth) - rightHUDElementWidth / 22, height * 0.892, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
 
             if (activeWepMaxPrimaryMag ~= -1) then
                 ammoText = "/"
-                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo", ScrW() - (72 + reserveAmmoWidth) - rightHUDElementWidth / 22, ScrH() - (leftHUDElementHeight / 2.6), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo", width - (72 + reserveAmmoWidth) - rightHUDElementWidth / 22, height * 0.89, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
 
                 ammoText = activeWepPrimaryMag or ammoText and ErrorNoHalt("Failed to get new value for primary magazine ammo text.\n")
                 local magazineAmmoWidth = surface.GetTextSize(ammoText)
-                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo", ScrW() - (75 + reserveAmmoWidth + magazineAmmoWidth) - rightHUDElementWidth / 22, ScrH() - (leftHUDElementHeight / 2.65), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo", width - (75 + reserveAmmoWidth + magazineAmmoWidth) - rightHUDElementWidth / 22, height * 0.892, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
             end
         end
 
@@ -378,14 +414,14 @@ function PANEL:Paint(width, height)
             ammoText = plySecondaryAmmo or ammoText and ErrorNoHalt("Failed to get new value for secondary reserve ammo text.\n")
             surface.SetFont("Monofonto_HUD_Ammo_Secondary")
 
-            local reserveAmmoWidth = surface.GetTextSize(ammoText)
-            local secondaryX = ScrW() - (58 + reserveAmmoWidth) - rightHUDElementWidth / 22
-            local secondaryY = ScrH() - (leftHUDElementHeight / 4.1)
+            local reserveAmmoWidth = width * surface.GetTextSize(ammoText) / 1600
+            local secondaryX = width - (58 + reserveAmmoWidth) - rightHUDElementWidth / 22
+            local secondaryY = height - (leftHUDElementHeight / 4.1)
 
             if (activeWepPrimaryAmmo == -1) then
                 surface.SetFont("Monofonto_HUD_Ammo")
                 reserveAmmoWidth = surface.GetTextSize(ammoText)
-                secondaryX, secondaryY = ScrW() - (55 + reserveAmmoWidth) - rightHUDElementWidth / 22, ScrH() - (leftHUDElementHeight / 2.65)
+                secondaryX, secondaryY = width - (55 + reserveAmmoWidth) - rightHUDElementWidth / 22, height * 0.892
 
                 TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo", secondaryX, secondaryY, HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
 
@@ -397,17 +433,17 @@ function PANEL:Paint(width, height)
 
             if (activeWepMaxSecondaryMag ~= -1) then
                 ammoText = "/"
-                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo_Secondary", ScrW() - (72 + reserveAmmoWidth) - rightHUDElementWidth / 22, ScrH() - (leftHUDElementHeight / 5.7), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo_Secondary", width - (72 + reserveAmmoWidth) - rightHUDElementWidth / 22, height - (leftHUDElementHeight / 5.7), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
 
                 ammoText = activeWepSecondaryMag or ammoText and ErrorNoHalt("Failed to get new value for secondary magazine ammo text.\n")
                 local magazineAmmoWidth = surface.GetTextSize(ammoText)
-                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo_Secondary", ScrW() - (75 + reserveAmmoWidth + magazineAmmoWidth) - rightHUDElementWidth / 22, ScrH() - (leftHUDElementHeight / 5.8), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
+                TextDoubleOutlined(ammoText, "Monofonto_HUD_Ammo_Secondary", width - (75 + reserveAmmoWidth + magazineAmmoWidth) - rightHUDElementWidth / 22, height - (leftHUDElementHeight / 5.8), HUDColor, TEXT_ALIGN_LEFT, textOutlineWidth, HUDTextOutlineColor, textOutlineWidth * 1.8, HUDTextSecondOutlineColor)
             end
         end
 
         --oxygen stuff
         if (plyOxygenTicks > -1 and ((ply:WaterLevel() == 3 and ply:GetMoveType() ~= MOVETYPE_NOCLIP) or plyOxygenTicks < 15)) then
-            local oxygenIndicatorXPos, oxygenIndicatorYPos = (ScrW() / 2 - oxygenIndicatorWidth / 2), 70
+            local oxygenIndicatorXPos, oxygenIndicatorYPos = (width / 2 - oxygenIndicatorWidth / 2), ScrH() * 0.07
 
             surface.SetDrawColor(HUDColor)
             surface.SetMaterial(oxygenIndicator)
@@ -418,8 +454,8 @@ function PANEL:Paint(width, height)
             if (plyOxygenTicks ~= 0) then
                 for ticks = 0, plyOxygenTicks do
                     local cos, sin = math.cos(math.rad((ticks - 5) * 22.5)), math.sin(math.rad((ticks - 5) * 22.5))
-                    local xModifier = 9 * sin - 21 * cos
-                    local yModifier = 9 * cos + 21 * sin
+                    local xModifier = ScreenScale(4.375) * sin - ScreenScale(8.875) * cos
+                    local yModifier = ScreenScale(4.375) * cos + ScreenScale(8.875) * sin
                     local oxygenIndicatorTickXPos, oxygenIndicatorTickYPos = (oxygenIndicatorXPos + 6), (oxygenIndicatorYPos + oxygenIndicatorTickHeight / 2 + 11)
 
                     surface.DrawTexturedRectRotated((oxygenIndicatorTickXPos + oxygenIndicatorTickWidth) + xModifier, oxygenIndicatorTickYPos + yModifier, oxygenIndicatorTickWidth, oxygenIndicatorTickHeight, ticks * 22.5)
@@ -432,11 +468,11 @@ function PANEL:Paint(width, height)
         if (IsValid(eyeTraceEntity) and hook.Run("ShouldNewVegasCrosshairHover", eyeTraceEntity)) then
             surface.SetDrawColor(HUDColor)
             surface.SetMaterial(crosshairHover)
-            surface.DrawTexturedRect(ScrW() / 2 - crosshairHoverWidth / 2, ScrH() / 2 - crosshairHoverHeight / 2, crosshairHoverWidth, crosshairHoverHeight)
+            surface.DrawTexturedRect(width / 2 - crosshairHoverWidth / 2, height / 2 - crosshairHoverHeight / 2, crosshairHoverWidth, crosshairHoverHeight)
         else
             surface.SetDrawColor(HUDColor)
             surface.SetMaterial(crosshair)
-            surface.DrawTexturedRect(ScrW() / 2 - crosshairWidth / 2, ScrH() / 2 - crosshairHeight / 2, crosshairWidth, crosshairHeight)
+            surface.DrawTexturedRect(width / 2 - crosshairWidth / 2, height / 2 - crosshairHeight / 2, crosshairWidth, crosshairHeight)
         end
 
         --explosive indicator
@@ -456,7 +492,7 @@ function PANEL:Paint(width, height)
 
                     surface.SetDrawColor(HUDColor.r, HUDColor.g, HUDColor.b, explosiveIndicatorAlpha)
                     surface.SetMaterial(explosiveIndicator)
-                    surface.DrawTexturedRectRotated(ScrW() / 2, ScrH() / 2, explosiveIndicatorWidth, explosiveIndicatorHeight, rotationAngle)
+                    surface.DrawTexturedRectRotated(width / 2, height / 2, explosiveIndicatorWidth, explosiveIndicatorHeight, rotationAngle)
                 end
             end
         end
