@@ -235,10 +235,6 @@ function PANEL:AddNotification(text, icon, duration)
     return queueIndex
 end
 
-function PANEL:OnScreenSizeChanged()
-    self:Paint(ScrW(), ScrH())
-end
-
 function PANEL:Paint(width, height)
     if (LocalPlayer():Alive() and LocalPlayer():GetCharacter()) then
         --hud texture sizes
