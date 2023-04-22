@@ -308,6 +308,7 @@ function PANEL:Paint(width, height)
         --compass
         render.PushRenderTarget(compassAlphaRT)
             cam.Start2D()
+                render.ClearDepth()
                 render.Clear( 0, 0, 0, 0 )
                 surface.SetDrawColor(HUDColor)
                 surface.SetMaterial(compassStrip)
