@@ -15,7 +15,7 @@ CAMI.RegisterPrivilege({
 
 if (SERVER) then
     function PLUGIN:OnNPCKilled(npc, attacker, inflictor)
-        if (npc.spawnerEnt) then
+        if (IsValid(npc.spawnerEnt)) then
             npc.spawnerEnt:NPCKilled()
         end
     end
@@ -71,7 +71,7 @@ properties.Add("npcspawner_edit", {
         if (entity:GetClass() != "npc_spawner") then return false end
         if (!gamemode.Call( "CanProperty", client, "npcspawner_edit", entity)) then return false end
 
-        return CAMI.PlayerHasAccess(client, "Helix - NPC Spawner", nil)
+        return client:CanUseNPCSpawner()
     end,
 
     Action = function(self, entity)

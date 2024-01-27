@@ -59,7 +59,7 @@ end
 
 if (SERVER) then
     function ENT:Use(activator)
-        if (hook.Run("CanPlayerUseNPCSpawner", activator) and activator:GetMoveType() == MOVETYPE_NOCLIP) then
+        if (activator:CanUseNPCSpawner() and activator:GetMoveType() == MOVETYPE_NOCLIP) then
 
             net.Start("npcSpawnerOpen")
                 net.WriteEntity(self)
@@ -182,8 +182,9 @@ if (SERVER) then
     end
 else
     function ENT:Draw()
-        if (hook.Run("CanPlayerUseNPCSpawner", LocalPlayer()) and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
+        if (LocalPlayer():CanUseNPCSpawner() and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
             self:DrawModel()
+
             if (ix.option.Get("observerESP", true) and ix.option.Get("npcSpawnerShowSpheres", true)) then
                 render.SetColorMaterial()
                 render.DrawSphere(self:GetPos(), self:GetNPCSpawnRadius(), 50, 50, ix.option.Get("npcSpawnerNpcZoneColor"))
@@ -197,7 +198,7 @@ else
     ENT.PopulateEntityInfo = true
 
     function ENT:OnPopulateEntityInfo(container)
-        if (hook.Run("CanPlayerUseNPCSpawner", LocalPlayer()) and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
+        if (LocalPlayer():CanUseNPCSpawner() and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
             local name = container:AddRow("name")
             name:SetImportant()
             name:SetText(L"npcSpawner")

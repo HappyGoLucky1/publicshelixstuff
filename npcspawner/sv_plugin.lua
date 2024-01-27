@@ -62,7 +62,7 @@ end
 net.Receive("npcSpawnerSaveChanges", function(len, client)
     local changes = {}
     local changeString = ""
-    if (!CAMI.PlayerHasAccess(client, "Helix - NPC Spawner", nil)) then return end
+    if (!client:CanUseNPCSpawner()) then return end
     local entity = net.ReadEntity()
     local enabledBool = net.ReadBool()
     local npcClass = net.ReadString()
