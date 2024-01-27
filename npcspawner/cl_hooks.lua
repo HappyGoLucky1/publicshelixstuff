@@ -1,5 +1,5 @@
 function PLUGIN:HUDPaint()
-    if (ix.option.Get("observerESP", true) and ix.option.Get("npcSpawnerShowSpawnedNpcs") and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
+    if (ix.option.Get("observerESP", true) and ix.option.Get("npcSpawnerShowSpawnedNpcs") and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP and !LocalPlayer():InVehicle()) then
         local scrW, scrH = ScrW(), ScrH()
 
         for k, v in pairs(ents.FindByClass("npc_spawner")) do

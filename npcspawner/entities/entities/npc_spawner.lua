@@ -182,7 +182,7 @@ if (SERVER) then
     end
 else
     function ENT:Draw()
-        if (LocalPlayer():CanUseNPCSpawner() and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP) then
+        if (LocalPlayer():CanUseNPCSpawner() and LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP and !LocalPlayer():InVehicle()) then
             self:DrawModel()
 
             if (ix.option.Get("observerESP", true) and ix.option.Get("npcSpawnerShowSpheres", true)) then
