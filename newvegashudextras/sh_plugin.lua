@@ -37,7 +37,25 @@ ix.config.Add("bulletDamageBasedOnWeaponCondition", true, "Modify the bullets da
 do
     for k, v in pairs(ix.item.list) do
         if (v.base == "base_weapons" and v.isGrenade == false) then
-            --with a broken weapon you can load comes a need for the ability to take that ammo out
+            v.functions.combine = {
+                OnRun = function(item, data)
+                    local repairKit = ix.item.instances[data[1]]
+
+                    item:SetData("condition", math.Clamp(math.Round(item:GetData("condition", 100) + repairKit.repairAmount), 0, 100))
+                    repairKit:Remove()
+
+                    return false
+                end,
+                OnCanRun = function(item, data)
+                    local repairKit = ix.item.instances[data[1]]
+
+                    if (item:GetData("condition") and item.base == "base_weapons" and isnumber(repairKit.repairAmount)) then
+                        return true
+                    end
+
+                    return false
+                end
+            }
             v.functions.Unload = {
                 name = "Unload",
                 tip = "unloadTip",
